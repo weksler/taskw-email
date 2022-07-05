@@ -1,9 +1,9 @@
-import imaplib
-import email
 from decouple import config
-import sys
+import email
+import imaplib
 import logging
 from subprocess import run
+import sys
 
 
 class TaskEmails:
@@ -96,7 +96,7 @@ Log_Format = "%(levelname)s %(name)s %(asctime)s: %(message)s"
 logging.basicConfig(stream=sys.stdout,
                     filemode="w",
                     format=Log_Format,
-                    level=logging.DEBUG)
+                    level=config('TASKW_EMAIL_LOG_LEVEL', cast=int, default=logging.ERROR))
 log = logging.getLogger("taskw-email")
 
 taskw = TaskWarriorCmdLine()
