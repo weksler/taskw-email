@@ -1,8 +1,11 @@
 from decouple import config
 import email
+from email.message import EmailMessage
 import imaplib
 import logging
 from subprocess import run
+import smtplib
+import ssl
 import sys
 
 
@@ -92,6 +95,34 @@ class TaskWarriorCmdLine:
         return response
 
 
+class EmailResponse:
+    def __init__(self, smtp_server, smtp_port, username, password, sender_email, task_line):
+        self.smtp_server = smtp_server
+        self.username = username
+        self.password = password
+        self.sender_email = sender_email
+        self.task_line = task_line
+        self.smtp_port = smtp_port
+        self.response = ""
+
+    def add_response(self, taskw_response):
+        self.response += "\n%s" % taskw_response
+
+    def send_response(self):
+        msg = EmailMessage()
+        msg.set_content(self.response)
+        from_email = "Taskwarrior Email Bot <%s>" % self.username
+        subject_line = "Re: %s" % self.task_line
+        msg['To'] = self.sender_email
+        msg['From'] = from_email
+        msg['Subject'] = subject_line
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context=context) as server:
+            server.login(self.username, self.password)
+            server.sendmail(from_email, self.sender_email, msg.as_string())
+            log.debug("Message to %s with subject %s sent successfully", self.sender_email, subject_line)
+
+
 Log_Format = "%(levelname)s %(name)s %(asctime)s: %(message)s"
 logging.basicConfig(stream=sys.stdout,
                     filemode="w",
@@ -99,11 +130,19 @@ logging.basicConfig(stream=sys.stdout,
                     level=config('TASKW_EMAIL_LOG_LEVEL', cast=int, default=logging.ERROR))
 log = logging.getLogger("taskw-email")
 
+mail_server = config('TASKW_EMAIL_MAIL_SERVER')
+username = config('TASKW_EMAIL_USERNAME')
+password = config('TASKW_EMAIL_PASSWORD')
+sender_email = config('TASKW_EMAIL_SENDER_EMAIL')
+smtp_port = config('TASKW_EMAIL_SMTP_PORT', cast=int, default=465)
+
 taskw = TaskWarriorCmdLine()
-for task_line in TaskEmails(config('TASKW_EMAIL_MAIL_SERVER'),
-                            config('TASKW_EMAIL_USERNAME'),
-                            config('TASKW_EMAIL_PASSWORD'),
-                            config('TASKW_EMAIL_SENDER_EMAIL')):
-    print("Task line is: *******", task_line)
+for task_line in TaskEmails(mail_server, username, password, sender_email):
+    log.debug("Task line is: ******* %s", task_line)
+
     response = taskw.process_line(task_line)
-    print("Task Warrior said: **", response)
+    log.debug("Task Warrior said: ** %s", response)
+
+    email_response = EmailResponse(mail_server, smtp_port, username, password, sender_email, task_line)
+    email_response.add_response(response)
+    email_response.send_response()
