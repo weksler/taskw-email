@@ -1,3 +1,5 @@
+import re
+
 from decouple import config
 import email
 from email.message import EmailMessage
@@ -80,10 +82,10 @@ class TaskWarriorCmdLine:
 
     def process_line(self, task_line):
         task_line = task_line.strip()
-        if task_line.startswith('taskcmd:'):
+        if TASKCMD_RE_MATCHER.match(task_line):
             return "taskcmd not yet implemented (%s)" % task_line
-        elif task_line.startswith('task:'):
-            return self.add_task(task_line[5:])
+        elif TASK_RE_MATCHER.match(task_line):
+            return self.add_task(task_line[len(TASK_KEYWORD):])
         else:
             return "Couldn't figure out what to do with %s" % task_line
 
@@ -130,19 +132,23 @@ logging.basicConfig(stream=sys.stdout,
                     level=config('TASKW_EMAIL_LOG_LEVEL', cast=int, default=logging.ERROR))
 log = logging.getLogger("taskw-email")
 
-mail_server = config('TASKW_EMAIL_MAIL_SERVER')
-username = config('TASKW_EMAIL_USERNAME')
-password = config('TASKW_EMAIL_PASSWORD')
-sender_email = config('TASKW_EMAIL_SENDER_EMAIL')
-smtp_port = config('TASKW_EMAIL_SMTP_PORT', cast=int, default=465)
+MAIL_SERVER = config('TASKW_EMAIL_MAIL_SERVER')
+USERNAME = config('TASKW_EMAIL_USERNAME')
+PASSWORD = config('TASKW_EMAIL_PASSWORD')
+SENDER_EMAIL = config('TASKW_EMAIL_SENDER_EMAIL')
+SMTP_PORT = config('TASKW_EMAIL_SMTP_PORT', cast=int, default=465)
+TASK_KEYWORD="task:"
+TASK_RE_MATCHER = re.compile(TASK_KEYWORD, re.IGNORECASE)
+TASKCMD_KEYWORD="taskcmd:"
+TASKCMD_RE_MATCHER = re.compile(TASKCMD_KEYWORD, re.IGNORECASE)
 
 taskw = TaskWarriorCmdLine()
-for task_line in TaskEmails(mail_server, username, password, sender_email):
+for task_line in TaskEmails(MAIL_SERVER, USERNAME, PASSWORD, SENDER_EMAIL):
     log.debug("Task line is: ******* %s", task_line)
 
     response = taskw.process_line(task_line)
     log.debug("Task Warrior said: ** %s", response)
 
-    email_response = EmailResponse(mail_server, smtp_port, username, password, sender_email, task_line)
+    email_response = EmailResponse(MAIL_SERVER, SMTP_PORT, USERNAME, PASSWORD, SENDER_EMAIL, task_line)
     email_response.add_response(response)
     email_response.send_response()
