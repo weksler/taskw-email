@@ -14,4 +14,4 @@ pytest-mock = "*"
 python_version = "3.10"
 
 [scripts]
-taskw-email = "python3 taskw_email.py"
+taskw-email = "python3 taskw_email/taskw_email.py"
