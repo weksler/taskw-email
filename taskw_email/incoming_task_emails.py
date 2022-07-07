@@ -1,37 +1,37 @@
-from cfg import log
+from .cfg import log
 import email
-import imaplib
+import re
+from email.utils import parseaddr
 
 
 class IncomingTaskEmails:
-    def __init__(self, imap_server, imap_user, imap_password, sender_email):
-        self.imap_server = imap_server
+    def __init__(self, imap_user, imap_password, sender_email, imap_connection):
         self.imap_user = imap_user
         self.imap_password = imap_password
         self.sender_email = sender_email
-        self.conn = imaplib.IMAP4_SSL(imap_server)
+        self.imap_connection = imap_connection
         try:
-            self.conn.login(imap_user, imap_password)
+            self.imap_connection.login(imap_user, imap_password)
         except Exception as e:
-            log.critical("failed to connect to server %s as user %s (exception %s)", imap_server, imap_user, e,
-                         exc_info=True)
+            log.critical("failed to connect as user %s (exception %s)", imap_user, e, exc_info=True)
             raise RuntimeError
 
     def __del__(self):
         try:
-            self.conn.close()
+            self.imap_connection.close()
         except:
             None  # ignore
 
     def __iter__(self):
-        retcode, messages = self.conn.select("INBOX")
+        retcode, messages = self.imap_connection.select("INBOX")
         if retcode != 'OK':
+            self.imap_connection.close()
             raise RuntimeError("Got error <" + retcode + "> when selecting INBOX")
         log.debug("INBOX contains %s messages", int(messages[0]))
         return self
 
     def __next__(self):
-        retcode, messages = self.conn.search(None, '(UNSEEN)')
+        retcode, messages = self.imap_connection.search(None, '(UNSEEN)')
         if retcode != 'OK':
             log.critical("Error fetching unread messages - return code %s", retcode)
             raise StopIteration
@@ -43,7 +43,7 @@ class IncomingTaskEmails:
 
         for unread_message_num in unread_messages:
             log.debug("Now processing message %s", unread_message_num)
-            retcode, data = self.conn.fetch(unread_message_num, '(RFC822)')
+            retcode, data = self.imap_connection.fetch(unread_message_num, '(RFC822)')
             if retcode != 'OK':
                 log.critical("Error fetching message %s, return code %s", unread_message_num, retcode)
                 raise StopIteration
@@ -51,7 +51,7 @@ class IncomingTaskEmails:
             sender = msg['From']
             subject = msg['Subject']
             log.debug("Message from %s with subject %s", sender, subject)
-            if self.sender_email not in sender:
+            if self.sender_email != parseaddr(sender)[1]:
                 log.critical("Will not process tasks from %s", sender)
                 continue
 

@@ -3,9 +3,12 @@ from cfg import log
 from incoming_task_emails import IncomingTaskEmails
 from task_warrior_cmd_line import TaskWarriorCmdLine
 from email_response import EmailResponse
+import imaplib
 
+
+imap_connection = imaplib.IMAP4_SSL(cfg.MAIL_SERVER)
 taskw = TaskWarriorCmdLine()
-for task_line in IncomingTaskEmails(cfg.MAIL_SERVER, cfg.USERNAME, cfg.PASSWORD, cfg.SENDER_EMAIL):
+for task_line in IncomingTaskEmails(cfg.USERNAME, cfg.PASSWORD, cfg.SENDER_EMAIL, imap_connection):
     log.debug("Task line is: ******* %s", task_line)
 
     response = taskw.process_line(task_line)

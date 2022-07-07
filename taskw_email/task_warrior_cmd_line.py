@@ -1,4 +1,4 @@
-from cfg import log
+from .cfg import log
 import re
 from subprocess import run
 
@@ -7,7 +7,7 @@ class TaskWarriorCmdLine:
     def __init__(self):
         result = run("which task", shell=True, capture_output=True)
         if result.returncode != 0:
-            cfg.log.critical("Failed to find taskw executable.")
+            log.critical("Failed to find taskw executable.")
             raise RuntimeError
         self.taskw = result.stdout.strip().decode()
         log.debug("Task warrior executable is %s", self.taskw)
