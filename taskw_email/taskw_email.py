@@ -1,11 +1,11 @@
 import cfg
 from cfg import log
-from task_emails import TaskEmails
+from incoming_task_emails import IncomingTaskEmails
 from task_warrior_cmd_line import TaskWarriorCmdLine
 from email_response import EmailResponse
 
 taskw = TaskWarriorCmdLine()
-for task_line in TaskEmails(cfg.MAIL_SERVER, cfg.USERNAME, cfg.PASSWORD, cfg.SENDER_EMAIL):
+for task_line in IncomingTaskEmails(cfg.MAIL_SERVER, cfg.USERNAME, cfg.PASSWORD, cfg.SENDER_EMAIL):
     log.debug("Task line is: ******* %s", task_line)
 
     response = taskw.process_line(task_line)

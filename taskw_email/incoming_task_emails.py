@@ -2,7 +2,8 @@ from cfg import log
 import email
 import imaplib
 
-class TaskEmails:
+
+class IncomingTaskEmails:
     def __init__(self, imap_server, imap_user, imap_password, sender_email):
         self.imap_server = imap_server
         self.imap_user = imap_user
