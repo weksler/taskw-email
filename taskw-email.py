@@ -82,10 +82,13 @@ class TaskWarriorCmdLine:
 
     def process_line(self, task_line):
         task_line = task_line.strip()
-        if TASKCMD_RE_MATCHER.match(task_line):
+        matcher = TASKCMD_RE_MATCHER.search(task_line)
+        if matcher:
             return "taskcmd not yet implemented (%s)" % task_line
-        elif TASK_RE_MATCHER.match(task_line):
-            return self.add_task(task_line[len(TASK_KEYWORD):])
+        matcher = TASK_RE_MATCHER.search(task_line)
+        if matcher:
+            (_ignore, index) = matcher.span()
+            return self.add_task(task_line[index:])
         else:
             return "Couldn't figure out what to do with %s" % task_line
 
@@ -137,11 +140,8 @@ USERNAME = config('TASKW_EMAIL_USERNAME')
 PASSWORD = config('TASKW_EMAIL_PASSWORD')
 SENDER_EMAIL = config('TASKW_EMAIL_SENDER_EMAIL')
 SMTP_PORT = config('TASKW_EMAIL_SMTP_PORT', cast=int, default=465)
-TASK_KEYWORD = "task:"
-REPLY_PREFIX_EXPR = "(re: )*"
-TASK_RE_MATCHER = re.compile(REPLY_PREFIX_EXPR + TASK_KEYWORD, re.IGNORECASE)
-TASKCMD_KEYWORD = "taskcmd:"
-TASKCMD_RE_MATCHER = re.compile(REPLY_PREFIX_EXPR + TASKCMD_KEYWORD, re.IGNORECASE)
+TASK_RE_MATCHER = re.compile("(?P<all>^( *Re: *)*Task:)", re.IGNORECASE)
+TASKCMD_RE_MATCHER = re.compile("(?P<all>^( *Re: *)*Taskcmd:)", re.IGNORECASE)
 
 taskw = TaskWarriorCmdLine()
 for task_line in TaskEmails(MAIL_SERVER, USERNAME, PASSWORD, SENDER_EMAIL):
