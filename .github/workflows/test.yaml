@@ -14,6 +14,14 @@ jobs:
       matrix:
         python-version: [3.10.5]
     runs-on: ubuntu-latest
+    env:
+      TASKW_EMAIL_USERNAME: blah@blah.com
+      TASKW_EMAIL_PASSWORD: not a real password
+      TASKW_EMAIL_MAIL_SERVER: random@server.com
+      TASKW_EMAIL_SENDER_EMAIL: moreblah@blah.com
+      # get detailed logs
+      TASKW_EMAIL_LOG_LEVEL: 10
+      TASKW_EMAIL_SMTP_PORT: 465
 
     steps:
       - uses: actions/checkout@v3
