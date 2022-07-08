@@ -1,3 +1,4 @@
+from .cfg import TASKW_PATH
 from .cfg import log
 import re
 from subprocess import run
@@ -7,11 +8,14 @@ class TaskWarriorCmdLine:
     """Sends a command to task warrior by invoking the executable, and returns task warrior's response."""
 
     def __init__(self):
-        result = run("which task", shell=True, capture_output=True)
-        if result.returncode != 0:
-            log.critical("Failed to find taskw executable.")
-            raise RuntimeError
-        self.taskw = result.stdout.strip().decode()
+        if TASKW_PATH:
+            self.taskw = TASKW_PATH
+        else:
+            result = run("which task", shell=True, capture_output=True)
+            if result.returncode != 0:
+                log.critical("Failed to find taskw executable.")
+                raise RuntimeError
+            self.taskw = result.stdout.strip().decode()
         log.debug("Task warrior executable is %s", self.taskw)
 
     def __del__(self):
