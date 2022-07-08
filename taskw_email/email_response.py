@@ -5,6 +5,10 @@ import ssl
 
 
 class EmailResponse:
+    """Sends a response to a previously received task warrior command,
+    including the output from task warrior in it.
+    """
+
     def __init__(self, smtp_server, smtp_port, username, password, sender_email, task_line):
         self.smtp_server = smtp_server
         self.username = username

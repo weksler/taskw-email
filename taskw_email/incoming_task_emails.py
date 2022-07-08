@@ -4,6 +4,10 @@ from email.utils import parseaddr
 
 
 class IncomingTaskEmails:
+    """An iterator for retrieving emails from the inbox of an imap server, ignoring their content and
+    only returning the subject line from the emails if they are from the specified sender_email.
+    """
+
     def __init__(self, imap_user, imap_password, sender_email, imap_connection):
         self.imap_user = imap_user
         self.imap_password = imap_password

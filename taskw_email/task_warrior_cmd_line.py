@@ -4,6 +4,8 @@ from subprocess import run
 
 
 class TaskWarriorCmdLine:
+    """Sends a command to task warrior by invoking the executable, and returns task warrior's response."""
+
     def __init__(self):
         result = run("which task", shell=True, capture_output=True)
         if result.returncode != 0:
