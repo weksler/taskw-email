@@ -24,7 +24,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: python -m pipenv sync
+        run: |
+          python -m pip install pipenv
+          python -m pipenv sync
       
       - name: Run unit tests
         run: python -m pipenv run pytest --import-mode=append tests/
