@@ -30,4 +30,4 @@ jobs:
           python -m pipenv sync
       
       - name: Run unit tests
-        run: python -m pipenv run pytest --import-mode=append tests/
+        run: python -m pipenv run pytest
