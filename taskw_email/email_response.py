@@ -1,4 +1,4 @@
-from cfg import log
+from .cfg import log
 from email.message import EmailMessage
 import smtplib
 import ssl

@@ -1,6 +1,5 @@
 from .cfg import log
 import email
-import re
 from email.utils import parseaddr
 
 
