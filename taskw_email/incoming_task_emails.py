@@ -51,6 +51,7 @@ class IncomingTaskEmails:
                 log.critical("Error fetching message %s, return code %s", unread_message_num, retcode)
                 raise StopIteration
             message_string = data[0][1].decode('utf-8')
+            log.debug('Message is:\n--------\n%s\n---------\n', message_string)
             msg = email.message_from_string(message_string)
             sender = msg['From']
             subject = msg['Subject']
