@@ -15,10 +15,18 @@ def test_bad_creds(mock_imap_connection):
         IncomingTaskEmails("user", "password", "from@a.com", mock_imap_connection)
 
 
+def test_utf8_not_supported(mock_imap_connection):
+    mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('ERROR', -1)
+    with pytest.raises(RuntimeError):
+        IncomingTaskEmails("user", "password", "from@a.com", mock_imap_connection)
+
+
 def test_no_inbox(mock_imap_connection):
     # Setup:
     # Login works
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     # No inbox is found
     mock_imap_connection.select.return_value = ('NOT FOUND', -1)
 
@@ -32,6 +40,7 @@ def test_no_inbox(mock_imap_connection):
     # Ensure calls were actually made
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.close()
     ]
@@ -40,6 +49,7 @@ def test_no_inbox(mock_imap_connection):
 def test_can_fetch_unread_messages(mock_imap_connection):
     # Setup:
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     mock_imap_connection.select.return_value = ('OK', [b'25'])
     mock_imap_connection.search.return_value = ('ERROR', -1)
 
@@ -50,6 +60,7 @@ def test_can_fetch_unread_messages(mock_imap_connection):
     # Verify
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.search(None, "(UNSEEN)"),
         call.close()
@@ -59,6 +70,7 @@ def test_can_fetch_unread_messages(mock_imap_connection):
 def test_no_unread_messages(mock_imap_connection):
     # Setup:
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     mock_imap_connection.select.return_value = ('OK', [b'25'])
     mock_imap_connection.search.return_value = ('OK', [b''])
 
@@ -69,6 +81,7 @@ def test_no_unread_messages(mock_imap_connection):
     # Verify
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.search(None, "(UNSEEN)"),
         call.close()
@@ -78,6 +91,7 @@ def test_no_unread_messages(mock_imap_connection):
 def test_cant_fetch_message(mock_imap_connection):
     # Setup:
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     mock_imap_connection.select.return_value = ('OK', [b'25'])
     mock_imap_connection.search.return_value = ('OK', [b'2 6'])
     mock_imap_connection.fetch.return_value = ('FAILED', "")
@@ -89,6 +103,7 @@ def test_cant_fetch_message(mock_imap_connection):
     # Verify
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.search(None, "(UNSEEN)"),
         call.fetch("2", "(RFC822)"),
@@ -99,6 +114,7 @@ def test_cant_fetch_message(mock_imap_connection):
 def test_message_wrong_sender(mock_imap_connection):
     # Setup:
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     mock_imap_connection.select.return_value = ('OK', [b'25'])
     mock_imap_connection.search.side_effect = [('OK', [b'2 6'])]
     mock_imap_connection.fetch.side_effect = [
@@ -130,6 +146,7 @@ def test_message_wrong_sender(mock_imap_connection):
     assert count == 1
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.search(None, "(UNSEEN)"),
         call.fetch("2", "(RFC822)"),
@@ -142,6 +159,7 @@ def test_message_wrong_sender(mock_imap_connection):
 def test_happy_path(mock_imap_connection):
     # Setup:
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     mock_imap_connection.select.return_value = ('OK', [b'25'])
     mock_imap_connection.search.side_effect = [('OK', [b'2']), ('OK', [b''])]
     mock_imap_connection.fetch.return_value = ('OK', [[
@@ -160,6 +178,7 @@ def test_happy_path(mock_imap_connection):
     # Verify
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.search(None, "(UNSEEN)"),
         call.fetch("2", "(RFC822)"),
@@ -171,6 +190,7 @@ def test_happy_path(mock_imap_connection):
 def test_happy_path_explicit_utf8(mock_imap_connection):
     # Setup:
     mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
     mock_imap_connection.select.return_value = ('OK', [b'25'])
     mock_imap_connection.search.side_effect = [('OK', [b'2']), ('OK', [b''])]
     mock_imap_connection.fetch.return_value = ('OK', [[
@@ -189,6 +209,7 @@ def test_happy_path_explicit_utf8(mock_imap_connection):
     # Verify
     assert mock_imap_connection.mock_calls == [
         call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
         call.select("INBOX"),
         call.search(None, "(UNSEEN)"),
         call.fetch("2", "(RFC822)"),

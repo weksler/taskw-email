@@ -15,9 +15,15 @@ class IncomingTaskEmails:
         self.imap_connection = imap_connection
         try:
             self.imap_connection.login(imap_user, imap_password)
+            retcode, _ignore = self.imap_connection.enable("UTF8=ACCEPT")
+            if retcode != 'OK':
+                self.imap_connection.close()
+                raise RuntimeError("Got error <" + retcode + "> when enabling UTF8")
         except Exception as e:
             log.critical("failed to connect as user %s (exception %s)", imap_user, e, exc_info=True)
             raise RuntimeError
+
+
 
     def __del__(self):
         try:
