@@ -3,7 +3,8 @@ import logging.handlers
 import logging
 import sys
 
-log_format = "%(levelname)s %(name)s %(asctime)s: %(message)s"
+# Setup logging to stdout and syslog
+log_format = "%(levelname)s %(name)s[%(process)d] %(asctime)s: %(message)s"
 logging.basicConfig(stream=sys.stdout,
                     filemode="w",
                     format=log_format,
@@ -14,6 +15,7 @@ sys_log_handler = logging.handlers.SysLogHandler(
 sys_log_handler.setFormatter(logging.Formatter(log_format))
 log.addHandler(sys_log_handler)
 
+# Load up config values from `.env`, and where appropriate, set defaults
 MAIL_SERVER = config('TASKW_EMAIL_MAIL_SERVER')
 USERNAME = config('TASKW_EMAIL_USERNAME')
 PASSWORD = config('TASKW_EMAIL_PASSWORD')
