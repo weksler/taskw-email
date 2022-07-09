@@ -43,5 +43,5 @@ class TaskWarriorCmdLine:
         return response
 
 
-TASK_RE_MATCHER = re.compile("(?P<all>^( *Re: *)*Task:)", re.IGNORECASE)
-TASKCMD_RE_MATCHER = re.compile("(?P<all>^( *Re: *)*Taskcmd:)", re.IGNORECASE)
+TASK_RE_MATCHER = re.compile("(?P<all>^( *(re|fw|fwd): *)*task: ?)", re.IGNORECASE)
+TASKCMD_RE_MATCHER = re.compile("(?P<all>^( *(re|fw|fwd): *)*taskcmd: ?)", re.IGNORECASE)
