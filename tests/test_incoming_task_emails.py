@@ -216,3 +216,34 @@ def test_happy_path_explicit_utf8(mock_imap_connection):
         call.search(None, "(UNSEEN)"),
         call.close()
     ]
+
+
+def test_happy_path_apostrophes(mock_imap_connection):
+    # Setup:
+    mock_imap_connection.login.return_value = None
+    mock_imap_connection.enable.return_value = ('OK', -1)
+    mock_imap_connection.select.return_value = ('OK', [b'25'])
+    mock_imap_connection.search.side_effect = [('OK', [b'2']), ('OK', [b''])]
+    mock_imap_connection.fetch.return_value = ('OK', [[
+        None,
+        (
+            'Content-Type: text/plain; charset="utf-8"\nContent-Transfer-Encoding: 7bit\n'
+            'MIME-Version: 1.0\nTo: to@x.com\nFrom: sender@x.com\nSubject: Task: pro:me review Izhar’s comments +next'
+            '\n\nOh hello there!\n'.encode('utf-8')
+        )
+    ]])
+
+    # Test
+    for task_line in IncomingTaskEmails("user", "password", "sender@x.com", mock_imap_connection):
+        assert task_line == 'Task: pro:me review Izhar’s comments +next'
+
+    # Verify
+    assert mock_imap_connection.mock_calls == [
+        call.login("user", "password"),
+        call.enable('UTF8=ACCEPT'),
+        call.select("INBOX"),
+        call.search(None, "(UNSEEN)"),
+        call.fetch("2", "(RFC822)"),
+        call.search(None, "(UNSEEN)"),
+        call.close()
+    ]

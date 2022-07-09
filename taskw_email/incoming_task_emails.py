@@ -1,6 +1,8 @@
 from .cfg import log
 import email
+from email import policy
 from email.utils import parseaddr
+from email.header import decode_header, make_header
 
 
 class IncomingTaskEmails:
@@ -56,11 +58,9 @@ class IncomingTaskEmails:
             if retcode != 'OK':
                 log.critical("Error fetching message %s, return code %s", unread_message_num, retcode)
                 raise StopIteration
-            message_string = data[0][1].decode('utf-8')
-            log.debug('Message is:\n--------\n%s\n---------\n', message_string)
-            msg = email.message_from_string(message_string)
+            msg = email.message_from_bytes(data[0][1], policy=policy.default)
             sender = msg['From']
-            subject = msg['Subject']
+            subject = str(msg['Subject'])
             log.debug("Message from %s with subject %s", sender, subject)
             if self.sender_email != parseaddr(sender)[1]:
                 log.critical("Will not process tasks from %s", sender)
