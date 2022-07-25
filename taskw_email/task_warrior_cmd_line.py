@@ -19,27 +19,31 @@ class TaskWarriorCmdLine:
         log.debug("Task warrior executable is %s", self.taskw)
 
     def __del__(self):
-        cmdline = [self.taskw, 'sync']
-        result = run(cmdline, shell=False, capture_output=True)
+        result = self.task_cmd('sync')
         log.debug("task sync returned %s - %s%s", result.returncode, result.stdout.decode(), result.stderr.decode())
 
     def process_line(self, task_line):
         task_line = task_line.strip()
         matcher = TASKCMD_RE_MATCHER.search(task_line)
         if matcher:
-            return "taskcmd not yet implemented (%s)" % task_line
+            (_ignore, index) = matcher.span()
+            return self.task_cmd(task_line[index:])
+
         matcher = TASK_RE_MATCHER.search(task_line)
         if matcher:
             (_ignore, index) = matcher.span()
             return self.add_task(task_line[index:])
-        else:
-            return "Couldn't figure out what to do with %s" % task_line
+
+        return "Couldn't figure out what to do with %s" % task_line
 
     def add_task(self, task_line):
-        cmdline = [self.taskw, 'add'] + task_line.split()
+        return self.task_cmd("add %s" % task_line)
+
+    def task_cmd(self, command):
+        cmdline = [self.taskw] + command.split()
         result = run(cmdline, shell=False, capture_output=True)
         response = "%s%s (%s)" % (result.stdout.decode().strip(), result.stderr.decode().strip(), result.returncode)
-        log.debug("task add %s - response is %s", task_line, response)
+        log.debug("task warrior command: %s - response is %s", command, response)
         return response
 
 
