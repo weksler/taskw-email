@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -18,7 +21,9 @@ jobs:
             |1|eMqvtZBPNUBv9B8TDJXZ5bCwwcs=|GowahPPBEKZb/GAoOzSzJFj46Xk= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcjQspsnya8eCjH+BjdvOLGnLPTcsUkwHL4mCty7m3AiiW0BZZFg05ZvFrBkuqX58+oKsIZqqMwLCkx0vXjXmWODqzQRjgxwRhhuDEqanHKNFEig1gJFhAJJblJ0HTUU/l7bkrrNO+Qf+MdP41jIBR6kBivMewdBKhrRbym7QLocO8Fo1dx+folWp2VR1vTCX73cmrP+igrAYnwbaeXV/RHCm12coX5n0lz24OJqYwc+bD8u8k9g+RRf6Vmu8bpBF1PJwDeIyQNa+EAXRo8MiAMsGtc5ppKQZfPqmjzgvcMq99PMnW0AVx2tzF/GsvHGfoS/ILCrc99FvLK6yIfThh
             |1|gezlKa1wYK6t89QiHyCKjF0Yie0=|rp2WLC0n2wF8+qeLTP9D26ngQf4= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKABru4sGG5qcvoCoXztNlDi+vYIMn6uAK6jb0B02mkUJ2hmWpxpO9GYeB9lyJKe5qbEcBYA0ZCKykwn/p6eOH8=
             |1|uspI3aMlhL4KE2a0OcxQyCV51R0=|ZekhkmqpJpYYI6jG++4yawqfpTs= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGOnvDV4HaNcvwNo+UXRCfnLB+fxMXxYj3UcIx/Kb+I2
+
       - name: Create destination directory if necessary
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'mkdir -p /home/michel/task'
+
       - name: Deploy with rsync
         run: rsync -arvz $GITHUB_WORKSPACE/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/michel/task
