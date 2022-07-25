@@ -50,6 +50,3 @@ jobs:
       - name: Run test suite
         run: |
           pipenv run pytest
-
-      - name: Deploy
-        uses: ./.github/workflows/deploy.yml
