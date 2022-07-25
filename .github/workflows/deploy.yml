@@ -21,4 +21,4 @@ jobs:
       - name: Create destination directory if necessary
         run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'mkdir -p /home/michel/task'
       - name: Deploy with rsync
-        run: rsync -avz . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/michel/task
+        run: rsync -avz ${{ GITHUB_WORKSPACE }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/michel/task
