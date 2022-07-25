@@ -23,7 +23,10 @@ jobs:
             |1|uspI3aMlhL4KE2a0OcxQyCV51R0=|ZekhkmqpJpYYI6jG++4yawqfpTs= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGOnvDV4HaNcvwNo+UXRCfnLB+fxMXxYj3UcIx/Kb+I2
 
       - name: Create destination directory if necessary
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'mkdir -p /home/michel/task'
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'mkdir -p /home/michel/taskw-email'
 
       - name: Deploy with rsync
-        run: rsync -arvz $GITHUB_WORKSPACE/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/michel/task
+        run: rsync -arvz --exclude=.git/ --execlude=tests/ $GITHUB_WORKSPACE/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/michel/taskw-email
+
+      - name: Install pipenv dependencies
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd /home/michel/taskw-email && pipenv sync'
