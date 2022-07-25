@@ -20,7 +20,7 @@ class TaskWarriorCmdLine:
 
     def __del__(self):
         result = self.task_cmd('sync')
-        log.debug("task sync returned %s - %s%s", result.returncode, result.stdout.decode(), result.stderr.decode())
+        log.debug(result)
 
     def process_line(self, task_line):
         task_line = task_line.strip()
