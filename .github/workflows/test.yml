@@ -1,4 +1,4 @@
-name: tests
+name: test and deploy
 
 on:
   push:
@@ -49,4 +49,7 @@ jobs:
 
       - name: Run test suite
         run: |
-          pipenv run pytest 
+          pipenv run pytest
+
+      - name: Deploy
+        uses: ./.github/workflows/deploy.yml
