@@ -23,12 +23,22 @@ class EmailResponse:
 
     def send_response(self):
         msg = EmailMessage()
-        msg.set_content(self.response)
         from_email = "Taskwarrior Email Bot <%s>" % self.username
         subject_line = "Re: %s" % self.task_line
         msg['To'] = self.sender_email
         msg['From'] = from_email
         msg['Subject'] = subject_line
+        msg.set_content(self.response)
+        msg.add_alternative(("""\
+        <html>
+          <head></head>
+          <body>
+          <pre>%s
+          </pre>
+          </body>
+        </html>
+        """ % self.response), subtype='html')
+
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, context=context) as server:
             server.login(self.username, self.password)
